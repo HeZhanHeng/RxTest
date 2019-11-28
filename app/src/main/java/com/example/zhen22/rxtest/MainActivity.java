@@ -1,10 +1,13 @@
 package com.example.zhen22.rxtest;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
-import java.util.Observable;
+import com.example.zhen22.rxtest.activity.LoginActivity;
 
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -13,13 +16,25 @@ import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity {
 private static final String TAG="RxJava";
+private TextView tv;
 private Disposable disposable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initView();
         initFirst();//方式一：分步骤实现
         initSecond();//方式二：基于事件流的链式调用
+    }
+    private void initView(){
+        tv=(TextView)findViewById(R.id.tv);
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
+            }
+        });
     }
     private void initFirst(){
         //        创建被观察者&生产事件
