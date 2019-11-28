@@ -13,6 +13,7 @@ import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity {
 private static final String TAG="RxJava";
+private Disposable disposable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,10 +38,15 @@ private static final String TAG="RxJava";
             @Override
             public void onSubscribe(Disposable d) {
                 Log.d(TAG, "开始采用subscribe连接");
+                disposable=d;
             }
 
             @Override
             public void onNext(Integer value) {
+                if (value==3){
+                    disposable.dispose();//取消订阅，一般用于stop和pause方法中
+                    return;
+                }
                 Log.d(TAG, "对Next事件"+value+"做出响应");
             }
 
@@ -66,6 +72,7 @@ private static final String TAG="RxJava";
                 e.onNext(3);
                 e.onNext(4);
                 e.onNext(5);
+                e.onComplete();
             }
         }).subscribe(new Observer<Integer>() {
             @Override
