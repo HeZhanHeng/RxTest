@@ -9,6 +9,10 @@ import android.widget.TextView;
 
 import com.example.zhen22.rxtest.R;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -25,6 +29,7 @@ private Disposable disposable;
         initView();
         initFirst();//方式一：分步骤实现
         initSecond();//方式二：基于事件流的链式调用
+        initThird();//just、from和create的区别：前者适用于数据已经备齐，不可修改；而后者适用于数据的实时改变
     }
     private void initView(){
         tv=(TextView)findViewById(R.id.tv);
@@ -110,5 +115,31 @@ private Disposable disposable;
                 Log.d(TAG, "对Complete事件作出响应");
             }
         });
+    }
+    private void initThird(){
+        Observer<String[]> subscriber=new Observer<String[]>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(String[] value) {
+                Log.d(TAG, "onNext: "+value);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
+//        Observable<String> observable=Observable.just("test1","test2","test3");//自带遍历
+        Observable<String[]>observable=Observable.just(new String[]{"test1","test2","test3"});//直接传整个数组
+        observable.subscribe(subscriber);
     }
 }
