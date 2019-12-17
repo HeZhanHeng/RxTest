@@ -1,19 +1,17 @@
 package com.example.zhen22.rxtest.activity;
 
 import android.content.Intent;
-import android.os.Binder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.zhen22.rxtest.R;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,7 +21,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
@@ -37,6 +34,8 @@ private Unbinder unbinder;
 Button btn;
 @BindView(R.id.btn2)
 Button btn2;
+@BindView(R.id.btn3)
+Button btn3;
 private Disposable disposable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +67,7 @@ private Disposable disposable;
                 e.onNext(3);
                 e.onNext(4);
                 e.onComplete();
+//                e.onError(new RuntimeException("aa错误"));
             }
         });
 //        创建观察者并定义响应时间
@@ -99,6 +99,7 @@ private Disposable disposable;
         };
 //        通过订阅连接被观察者和观察者(点菜)
         observable.subscribe(observer);
+//        observable.subscribe(a)
     }
     private void initSecond(){
         io.reactivex.Observable.create(new ObservableOnSubscribe<Integer>() {
@@ -159,7 +160,7 @@ private Disposable disposable;
         Observable<String[]>observable=Observable.just(new String[]{"test1","test2","test3"});//直接传整个数组
         observable.subscribe(subscriber);
     }
-    final Observer<String> observer=new Observer<String>() {
+    final Observer<String> observerd=new Observer<String>() {
         @Override
         public void onSubscribe(Disposable d) {
 
@@ -181,7 +182,7 @@ private Disposable disposable;
 
         }
     };
-    @OnClick({R.id.btn,R.id.btn2})
+    @OnClick({R.id.btn,R.id.btn2,R.id.btn3})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.btn:
@@ -203,7 +204,7 @@ private Disposable disposable;
                     }
                 }).observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
-                        .subscribe(observer);
+                        .subscribe(observerd);
                 break;
             case R.id.btn2:
                 Observable.create(new ObservableOnSubscribe<Integer>() {
@@ -232,7 +233,42 @@ private Disposable disposable;
                                 return "hzh"+aFloat;
                             }
                         })
-                        .subscribe(observer);
+                        .subscribe(observerd);
+                break;
+            case R.id.btn3:
+//                map可以将其转换为其他类型，而flatmap是先将其转换成一个新的Observable，进而遍历数组
+                final String[]students={"张三","李四","王五"};
+                Observable.create(new ObservableOnSubscribe<String[]>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<String[]> e) throws Exception {
+                            e.onNext(students);
+                    }
+                }).map(new Function<String[], String>() {
+                    @Override
+                    public String apply(String[] strings) throws Exception {
+                        return students.toString();
+                    }
+                }).subscribe(new Observer<String>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(String value) {
+                        Log.e(TAG, "onNext:"+value );
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
                 break;
                 default:
                     break;
