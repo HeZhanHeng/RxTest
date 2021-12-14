@@ -7,9 +7,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.zhen22.rxtest.ApiStores;
 import com.example.zhen22.rxtest.R;
+import com.example.zhen22.rxtest.module.TestBean;
 
+import junit.framework.Test;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +31,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 private static final String TAG="RxJava";
@@ -36,6 +49,10 @@ Button btn;
 Button btn2;
 @BindView(R.id.btn3)
 Button btn3;
+@BindView(R.id.btn4)
+Button btn4;
+@BindView(R.id.btn5)
+Button btn5;
 private Disposable disposable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,8 +185,24 @@ private Disposable disposable;
 
         @Override
         public void onNext(String value) {
-            Log.d(TAG, "onNext:"+value );
-            tv.setText(value);
+            OkHttpClient okHttpClient=new OkHttpClient();
+            Request request=new Request.Builder()
+                    .url("http://www.shljdb.cn/ifs/sys/organ/list?orgOid="+value)
+                    .get()
+                    .build();
+            okhttp3.Call call=okHttpClient.newCall(request);
+            call.enqueue(new okhttp3.Callback() {
+                @Override
+                public void onFailure(okhttp3.Call call, IOException e) {
+
+                }
+
+                @Override
+                public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                    String result=response.body().string();
+                    Log.e("打印数据=",result);
+                }
+            });
         }
 
         @Override
@@ -179,10 +212,10 @@ private Disposable disposable;
 
         @Override
         public void onComplete() {
-
+            Toast.makeText(MainActivity.this,"加载数据完成",Toast.LENGTH_SHORT).show();
         }
     };
-    @OnClick({R.id.btn,R.id.btn2,R.id.btn3})
+    @OnClick({R.id.btn,R.id.btn2,R.id.btn3,R.id.btn4,R.id.btn5})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.btn:
@@ -200,7 +233,14 @@ private Disposable disposable;
                 Observable.create(new ObservableOnSubscribe<String>() {
                     @Override
                     public void subscribe(ObservableEmitter<String> e) throws Exception {
-                        e.onNext("链式简写完毕");
+                        e.onNext("1");
+                        e.onNext("2");
+                        e.onNext("3");
+                        e.onNext("4");
+                        e.onNext("5");
+                        e.onNext("6");
+                        e.onNext("7");
+//                        e.onComplete();
                     }
                 }).observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
@@ -257,6 +297,7 @@ private Disposable disposable;
                     @Override
                     public void onNext(String value) {
                         Log.e(TAG, "onNext:"+value );
+
                     }
 
                     @Override
@@ -269,6 +310,36 @@ private Disposable disposable;
 
                     }
                 });
+                break;
+            case R.id.btn4:
+//                String BaseUrl="https://www.mxnzp.com/";
+                Retrofit retrofit=new Retrofit.Builder()
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .baseUrl(ApiStores.BaseUrl)
+                        .build();
+                ApiStores apiStores=retrofit.create(ApiStores.class);
+                Call<TestBean>call=apiStores.loadJokers("1");
+                call.enqueue(new Callback<TestBean>() {
+                    @Override
+                    public void onResponse(Call<TestBean> call, Response<TestBean> response) {
+                        //成功返回数据后在这里处理，使用response.body();获取得到的结果
+                        TestBean testBean=response.body();
+                        Log.e(TAG, "onResponse: code="+testBean.getCode());
+                        Log.e(TAG, "onResponse: message="+testBean.getMsg());
+                        Log.e(TAG, "onResponse: context="+testBean.getData().getList().get(0).getContent());
+//                        response.body().toString();
+//                        Log.d(TAG,s+"");
+                    }
+
+                    @Override
+                    public void onFailure(Call<TestBean> call, Throwable t) {
+                    //请求失败在这里处理
+                        System.out.println("连接失败");
+                    }
+                });
+                break;
+            case R.id.btn5:
+
                 break;
                 default:
                     break;

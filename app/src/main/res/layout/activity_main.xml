@@ -30,4 +30,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="flatmap类型转换"/>
+    <Button
+        android:id="@+id/btn4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="retrofit请求数据"/>
+    <Button
+        android:id="@+id/btn5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="沙河路数据"/>
 </LinearLayout>
